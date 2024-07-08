@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include car_sale_report *.css
+recursive-include car_sale_report *.csv
+recursive-include car_sale_report *.html
+recursive-include car_sale_report *.ico
+recursive-include car_sale_report *.js
+recursive-include car_sale_report *.json
+recursive-include car_sale_report *.md
+recursive-include car_sale_report *.png
+recursive-include car_sale_report *.py
+recursive-include car_sale_report *.svg
+recursive-include car_sale_report *.txt
+recursive-exclude car_sale_report *.pyc
