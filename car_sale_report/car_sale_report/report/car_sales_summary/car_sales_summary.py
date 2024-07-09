@@ -111,7 +111,8 @@ def get_data(filters):
 	sales_invoice as delivery_document_no,
 	delivery_date as delivery_date,
 	customer ,
-	customer_name as customer_name
+	customer_name as customer_name,
+	creation
 from
 	`tabSerial No`""", as_dict=True)	
 
