@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import msgprint, _
+from frappe.utils import flt
 
 def execute(filters=None):
 	columns, data = [], []
@@ -15,10 +16,6 @@ def execute(filters=None):
 		return columns, data
 	
 	return columns, data 
-
-# Serial No (link)	Supplier Name (data)	Creation Document No (link PI)	
-# Creation Date(date)	Incoming Rate(currency)	Delivery Document No(link SI)	
-# Delivery Date(date)	Customer Name(data)	Net Rate(currency)	Profit(%)
 
 def get_columns(filters):
 	return[
@@ -98,6 +95,8 @@ def get_rate_from_si_based_on_serial_no(serial_no,sales_invoice):
 				concat(tsii.serial_no, char(10)) like concat('%', '%s', char(10), '%')
 				and parent = '%s'  limit 1""",(serial_no,sales_invoice),
 					as_dict=True,debug=1)	
+	
+	# print(data, '-rate')
 	return data		
 
 def get_data(filters):
@@ -114,6 +113,20 @@ def get_data(filters):
 	customer ,
 	customer_name as customer_name
 from
-	`tabSerial No`""")	
+	`tabSerial No`""", as_dict=True)	
+
+	for row in data:
+		if row.delivery_document_no != None:
+			si_rate = get_rate_from_si_based_on_serial_no(row.serial_no, row.delivery_document_no)
+			if len(si_rate) > 0 :
+				row['net_rate'] = si_rate[0].rate
+				if row.net_rate != 0 :
+					row['profit'] = flt(((row.incoming_rate / row.net_rate) * 100), 2)
+		else:
+			row['net_rate'] = 0
+			row['profit'] = 0
+
+
+	# print(data)
 
 	return data	
