@@ -85,12 +85,13 @@ def get_columns(filters):
 	]
 
 def get_conditions(filters):
-	conditions = ""
+	conditions = "1=1"
 
-	if filters.get("to_date") >= filters.get("from_date"):
-			conditions += " and creation between '{0}' and '{1}'".format(filters.get("from_date"),filters.get("to_date"))
-	else:
-		frappe.throw(_("To Date should be greater then From Date"))
+	if filters.get("to_date") and filters.get("from_date"):
+		if filters.get("to_date") >= filters.get("from_date"):
+				conditions += " and creation between '{0}' and '{1}'".format(filters.get("from_date"),filters.get("to_date"))
+		else:
+			frappe.throw(_("To Date should be greater then From Date"))
 
 	if filters.customer:
 		conditions += " and customer = %(customer)s"
@@ -102,7 +103,6 @@ def get_conditions(filters):
 
 
 def get_rate_from_si_based_on_serial_no(serial_no,sales_invoice):
-	print("serial_no,sales_invoice",serial_no,sales_invoice)
 	inv_data = frappe.db.sql(
 			"""select
 				rate
@@ -133,7 +133,8 @@ def get_data(filters):
 	customer_name as customer_name,
 	creation
 from
-	`tabSerial No`""".format(conditions), filters, as_dict=True)	
+	`tabSerial No`
+where {0}""".format(conditions), filters, as_dict=True)	
 
 	for row in data:
 		if row.delivery_document_no != None:
@@ -148,8 +149,5 @@ from
 		else:
 			row['net_rate'] = 0
 			row['profit'] = 0
-
-
-	# print(data)
 
 	return data	
