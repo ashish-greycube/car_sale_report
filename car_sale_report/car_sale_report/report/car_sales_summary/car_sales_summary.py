@@ -32,8 +32,8 @@ def get_columns(filters):
 		{
 			'fieldname':'supplier_name',
 			'label': _('Supplier Name'),
-			'fieldtype':'Link',
-			'options': 'Supplier',
+			'fieldtype':'Data',
+			# 'options': 'Supplier',
 			'width':'250',
 		},
 		{
@@ -87,5 +87,33 @@ def get_columns(filters):
 		},
 	]
 
+
+def get_rate_from_si_based_on_serial_no(serial_no,sales_invoice):
+	data = frappe.db.sql(
+			"""select
+				rate
+			from
+				`tabSales Invoice Item` tsii
+			where
+				concat(tsii.serial_no, char(10)) like concat('%', '%s', char(10), '%')
+				and parent = '%s'  limit 1""",(serial_no,sales_invoice),
+					as_dict=True,debug=1)	
+	return data		
+
 def get_data(filters):
-		pass
+	data = frappe.db.sql(
+			"""select
+	name as serial_no,
+	supplier ,
+	supplier_name as supplier_name,
+	purchase_document_no as creation_document_no,
+	purchase_date as creation_date,
+	purchase_rate as incoming_rate,
+	sales_invoice as delivery_document_no,
+	delivery_date as delivery_date,
+	customer ,
+	customer_name as customer_name
+from
+	`tabSerial No`""")	
+
+	return data	
