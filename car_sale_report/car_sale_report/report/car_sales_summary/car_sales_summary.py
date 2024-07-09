@@ -86,18 +86,18 @@ def get_columns(filters):
 
 
 def get_rate_from_si_based_on_serial_no(serial_no,sales_invoice):
-	data = frappe.db.sql(
+	print("serial_no,sales_invoice",serial_no,sales_invoice)
+	inv_data = frappe.db.sql(
 			"""select
 				rate
 			from
 				`tabSales Invoice Item` tsii
 			where
-				concat(tsii.serial_no, char(10)) like concat('%', '%s', char(10), '%')
-				and parent = '%s'  limit 1""",(serial_no,sales_invoice),
+				CONCAT(tsii.serial_no, char(10)) like CONCAT("%%", %s, char(10), "%%")
+				and parent = %s  limit 1 """,(serial_no,sales_invoice),
 					as_dict=True,debug=1)	
 	
-	# print(data, '-rate')
-	return data		
+	return inv_data		
 
 def get_data(filters):
 	data = frappe.db.sql(
@@ -120,8 +120,11 @@ from
 			si_rate = get_rate_from_si_based_on_serial_no(row.serial_no, row.delivery_document_no)
 			if len(si_rate) > 0 :
 				row['net_rate'] = si_rate[0].rate
-				if row.net_rate != 0 :
-					row['profit'] = flt(((row.incoming_rate / row.net_rate) * 100), 2)
+				if row.incoming_rate != 0 :
+					row['profit'] = flt((((row.net_rate-row.incoming_rate) / row.incoming_rate) * 100), 2)
+				else:
+					row['net_rate'] = row.net_rate
+					row['profit'] = 0					
 		else:
 			row['net_rate'] = 0
 			row['profit'] = 0
